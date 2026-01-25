@@ -30,49 +30,60 @@
         .logo-contenedor img {
             max-width: 120px; border-radius: 50%; border: 2px solid #fff;
             margin-bottom: 10px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
         }
 
-        h1 { color: #fff; margin: 0 0 15px 0; font-size: 1.5rem; }
+        h1 { color: #fff; margin: 0 0 15px 0; font-size: 1.5rem; letter-spacing: 2px; }
         
         #buscador { 
             width: 85%; max-width: 500px; padding: 12px; 
             border-radius: 5px; border: 1px solid var(--borde); 
-            font-size: 1rem; outline: none;
+            font-size: 1rem; outline: none; font-family: sans-serif;
         }
-
-        /* ESTILO PAGINACIÓN */
-        .paginacion { 
-            display: flex; justify-content: center; align-items: center; 
-            gap: 15px; padding: 20px; background: #eee; border-bottom: 1px solid #ddd;
-        }
-        .btn-pag {
-            background: var(--cuero); color: white; border: none;
-            padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;
-        }
-        .btn-pag:disabled { background: #ccc; cursor: not-allowed; }
-        #info-pagina { font-weight: bold; font-family: sans-serif; }
 
         .contenedor { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-            gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 25px; padding: 30px 20px; max-width: 1200px; margin: 0 auto; 
         }
         
         .card { 
             background: #fff; border: 1px solid var(--borde);
             border-radius: 4px; overflow: hidden; display: flex; 
-            flex-direction: column; padding: 10px; transition: 0.3s;
+            flex-direction: column; padding: 15px; transition: 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        .card:hover { transform: translateY(-5px); }
-        .img-container { width: 100%; height: 220px; margin-bottom: 10px; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        
+        .img-container { width: 100%; height: 250px; margin-bottom: 12px; }
         .card img { width: 100%; height: 100%; object-fit: contain; }
         
-        .titulo { font-size: 0.9rem; font-weight: bold; height: 3.5em; overflow: hidden; }
-        .precio { font-size: 1.2rem; font-weight: bold; color: var(--cuero); margin: 10px 0; }
-        .btn-ml { background: var(--cuero); color: #fff; text-decoration: none; text-align: center; padding: 8px; border-radius: 4px; font-size: 0.8rem; }
+        .titulo { font-size: 1rem; font-weight: bold; color: var(--madera); height: 3.5em; overflow: hidden; }
+        .precio { font-size: 1.4rem; font-weight: bold; color: var(--cuero); margin: 15px 0; }
+        
+        .btn-ml { 
+            background: var(--cuero); color: #fff; text-decoration: none; 
+            text-align: center; padding: 10px; border-radius: 4px; 
+            font-size: 0.8rem; font-weight: bold; text-transform: uppercase;
+        }
+
+        /* ESTILO PAGINACIÓN (Ahora abajo) */
+        .paginacion { 
+            display: flex; justify-content: center; align-items: center; 
+            gap: 20px; padding: 40px 20px; background: rgba(0,0,0,0.05); 
+            border-top: 1px solid var(--borde);
+        }
+        .btn-pag {
+            background: var(--madera); color: white; border: none;
+            padding: 10px 25px; border-radius: 5px; cursor: pointer; 
+            font-weight: bold; font-family: sans-serif; transition: 0.2s;
+        }
+        .btn-pag:hover:not(:disabled) { background: var(--cuero); }
+        .btn-pag:disabled { background: #ccc; cursor: not-allowed; }
+        #info-pagina { font-weight: bold; font-family: sans-serif; color: var(--madera); }
 
         @media (max-width: 480px) {
             .contenedor { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .img-container { height: 160px; }
+            .img-container { height: 180px; }
         }
     </style>
 </head>
@@ -80,25 +91,25 @@
 
     <header>
         <div class="logo-contenedor">
-            <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+            <img src="logo.png" alt="Logo Pesquisa Libros" onerror="this.style.display='none'">
         </div>
         <h1>PESQUISA LIBROS</h1>
         <input type="text" id="buscador" placeholder="Podés buscar por título, autor o editorial..." oninput="reinicioYFiltrado()">
     </header>
 
-    <div class="paginacion">
-        <button id="prev" class="btn-pag" onclick="cambiarPagina(-1)">Anterior</button>
-        <span id="info-pagina">Página 1</span>
-        <button id="next" class="btn-pag" onclick="cambiarPagina(1)">Siguiente</button>
-    </div>
-
     <main class="contenedor" id="galeria"></main>
+
+    <div class="paginacion">
+        <button id="prev" class="btn-pag" onclick="cambiarPagina(-1)">← Anterior</button>
+        <span id="info-pagina">Página 1</span>
+        <button id="next" class="btn-pag" onclick="cambiarPagina(1)">Siguiente →</button>
+    </div>
 
     <script>
         let todosLosLibros = [];
         let filtrados = [];
         let paginaActual = 1;
-        const librosPorPagina = 40; // Podés cambiar este número si querés ver más o menos por hoja
+        const librosPorPagina = 40; 
 
         async function cargarCatalogo() {
             try {
@@ -107,14 +118,12 @@
                 filtrados = todosLosLibros;
                 mostrarLibros();
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error cargando el catálogo:", error);
             }
         }
 
         function mostrarLibros() {
             const galeria = document.getElementById('galeria');
-            
-            // Cálculo de qué libros mostrar según la página
             const inicio = (paginaActual - 1) * librosPorPagina;
             const fin = inicio + librosPorPagina;
             const librosPagina = filtrados.slice(inicio, fin);
@@ -132,18 +141,20 @@
                 </article>
             `).join('');
 
-            // Actualizar info de página y botones
-            document.getElementById('info-pagina').innerText = `Página ${paginaActual} de ${Math.ceil(filtrados.length / librosPorPagina) || 1}`;
-            document.getElementById('prev').disabled = (paginaActual === 1);
-            document.getElementById('next').disabled = (paginaActual >= Math.ceil(filtrados.length / librosPorPagina));
+            // Actualizar el contador de páginas
+            const totalPaginas = Math.ceil(filtrados.length / librosPorPagina) || 1;
+            document.getElementById('info-pagina').innerText = `Página ${paginaActual} de ${totalPaginas}`;
             
-            // Volver arriba para que el usuario no quede abajo de la página
-            window.scrollTo(0,0);
+            // Apagar botones si no hay más páginas
+            document.getElementById('prev').disabled = (paginaActual === 1);
+            document.getElementById('next').disabled = (paginaActual >= totalPaginas);
         }
 
         function cambiarPagina(paso) {
             paginaActual += paso;
             mostrarLibros();
+            // Muy importante: Al pasar de página, volvemos arriba de todo
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
         function reinicioYFiltrado() {
@@ -151,7 +162,7 @@
             filtrados = todosLosLibros.filter(libro => 
                 libro.titulo.toLowerCase().includes(busqueda)
             );
-            paginaActual = 1; // Siempre vuelve a la 1 al buscar
+            paginaActual = 1; 
             mostrarLibros();
         }
 
