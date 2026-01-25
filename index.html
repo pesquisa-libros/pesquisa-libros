@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa Libros - Catálogo</title>
+    <style>
+        :root { 
+            --papel: #fdf6e3; 
+            --madera: #4b3621; 
+            --cuero: #8b4513; 
+            --texto: #2c2c2c; 
+            --borde: #d3c6aa;
+        }
+        
+        body { 
+            font-family: 'Georgia', serif; 
+            background-color: var(--papel); 
+            margin: 0; padding: 0; color: var(--texto); 
+        }
+        
+        header { 
+            background-color: var(--madera); 
+            padding: 25px 10px; text-align: center; 
+            position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-bottom: 4px solid var(--cuero);
+        }
+
+        .logo-contenedor img {
+            max-width: 120px; border-radius: 50%; border: 2px solid #fff;
+            margin-bottom: 10px;
+        }
+
+        h1 { color: #fff; margin: 0 0 15px 0; font-size: 1.5rem; }
+        
+        #buscador { 
+            width: 85%; max-width: 500px; padding: 12px; 
+            border-radius: 5px; border: 1px solid var(--borde); 
+            font-size: 1rem; outline: none;
+        }
+
+        /* ESTILO PAGINACIÓN */
+        .paginacion { 
+            display: flex; justify-content: center; align-items: center; 
+            gap: 15px; padding: 20px; background: #eee; border-bottom: 1px solid #ddd;
+        }
+        .btn-pag {
+            background: var(--cuero); color: white; border: none;
+            padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        .btn-pag:disabled { background: #ccc; cursor: not-allowed; }
+        #info-pagina { font-weight: bold; font-family: sans-serif; }
+
+        .contenedor { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; 
+        }
+        
+        .card { 
+            background: #fff; border: 1px solid var(--borde);
+            border-radius: 4px; overflow: hidden; display: flex; 
+            flex-direction: column; padding: 10px; transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .img-container { width: 100%; height: 220px; margin-bottom: 10px; }
+        .card img { width: 100%; height: 100%; object-fit: contain; }
+        
+        .titulo { font-size: 0.9rem; font-weight: bold; height: 3.5em; overflow: hidden; }
+        .precio { font-size: 1.2rem; font-weight: bold; color: var(--cuero); margin: 10px 0; }
+        .btn-ml { background: var(--cuero); color: #fff; text-decoration: none; text-align: center; padding: 8px; border-radius: 4px; font-size: 0.8rem; }
+
+        @media (max-width: 480px) {
+            .contenedor { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .img-container { height: 160px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-contenedor">
+            <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+        </div>
+        <h1>PESQUISA LIBROS</h1>
+        <input type="text" id="buscador" placeholder="Podés buscar por título, autor o editorial..." oninput="reinicioYFiltrado()">
+    </header>
+
+    <div class="paginacion">
+        <button id="prev" class="btn-pag" onclick="cambiarPagina(-1)">Anterior</button>
+        <span id="info-pagina">Página 1</span>
+        <button id="next" class="btn-pag" onclick="cambiarPagina(1)">Siguiente</button>
+    </div>
+
+    <main class="contenedor" id="galeria"></main>
+
+    <script>
+        let todosLosLibros = [];
+        let filtrados = [];
+        let paginaActual = 1;
+        const librosPorPagina = 40; // Podés cambiar este número si querés ver más o menos por hoja
+
+        async function cargarCatalogo() {
+            try {
+                const respuesta = await fetch('datos_web.json');
+                todosLosLibros = await respuesta.json();
+                filtrados = todosLosLibros;
+                mostrarLibros();
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        function mostrarLibros() {
+            const galeria = document.getElementById('galeria');
+            
+            // Cálculo de qué libros mostrar según la página
+            const inicio = (paginaActual - 1) * librosPorPagina;
+            const fin = inicio + librosPorPagina;
+            const librosPagina = filtrados.slice(inicio, fin);
+
+            galeria.innerHTML = librosPagina.map(libro => `
+                <article class="card">
+                    <div class="img-container">
+                        <img src="${libro['link foto']}" loading="lazy">
+                    </div>
+                    <div class="info">
+                        <div class="titulo">${libro.titulo}</div>
+                        <div class="precio">$${libro.precio}</div>
+                        <a href="${libro.link_ml}" class="btn-ml" target="_blank">Ver en Mercado Libre</a>
+                    </div>
+                </article>
+            `).join('');
+
+            // Actualizar info de página y botones
+            document.getElementById('info-pagina').innerText = `Página ${paginaActual} de ${Math.ceil(filtrados.length / librosPorPagina) || 1}`;
+            document.getElementById('prev').disabled = (paginaActual === 1);
+            document.getElementById('next').disabled = (paginaActual >= Math.ceil(filtrados.length / librosPorPagina));
+            
+            // Volver arriba para que el usuario no quede abajo de la página
+            window.scrollTo(0,0);
+        }
+
+        function cambiarPagina(paso) {
+            paginaActual += paso;
+            mostrarLibros();
+        }
+
+        function reinicioYFiltrado() {
+            const busqueda = document.getElementById('buscador').value.toLowerCase();
+            filtrados = todosLosLibros.filter(libro => 
+                libro.titulo.toLowerCase().includes(busqueda)
+            );
+            paginaActual = 1; // Siempre vuelve a la 1 al buscar
+            mostrarLibros();
+        }
+
+        window.onload = cargarCatalogo;
+    </script>
+</body>
+</html>
