@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pesquisa Libros - Catálogo</title>
+
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1549221342834927');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1549221342834927&ev=PageView&noscript=1"
+    /></noscript>
     <style>
         :root { 
             --papel: #fdf6e3; 
@@ -66,7 +82,6 @@
             font-size: 0.8rem; font-weight: bold; text-transform: uppercase;
         }
 
-        /* ESTILO PAGINACIÓN (Ahora abajo) */
         .paginacion { 
             display: flex; justify-content: center; align-items: center; 
             gap: 20px; padding: 40px 20px; background: rgba(0,0,0,0.05); 
@@ -141,11 +156,9 @@
                 </article>
             `).join('');
 
-            // Actualizar el contador de páginas
             const totalPaginas = Math.ceil(filtrados.length / librosPorPagina) || 1;
             document.getElementById('info-pagina').innerText = `Página ${paginaActual} de ${totalPaginas}`;
             
-            // Apagar botones si no hay más páginas
             document.getElementById('prev').disabled = (paginaActual === 1);
             document.getElementById('next').disabled = (paginaActual >= totalPaginas);
         }
@@ -153,7 +166,6 @@
         function cambiarPagina(paso) {
             paginaActual += paso;
             mostrarLibros();
-            // Muy importante: Al pasar de página, volvemos arriba de todo
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
